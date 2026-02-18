@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<body>
+<h3>Employees - Longest Common Project Period</h3>
+
+<input id="f" type="file" accept=".csv">
+<button onclick="go()">Analyze</button>
+
+<div id="top" style="margin-top:10px;font-weight:bold;"></div>
+
+<table border="1" cellpadding="6" id="tbl" style="display:none; margin-top:10px;">
+    <tr>
+        <th>Emp1</th>
+        <th>Emp2</th>
+        <th>Project</th>
+        <th>Days</th>
+    </tr>
+</table>
+
+<script>
+    async function go() {
+        const file = document.getElementById('f').files[0];
+        if (!file) return alert("Choose a CSV first");
+
+        const fd = new FormData();
+        fd.append("file", file);
+
+        const res = await fetch("/api/analyze", { method: "POST", body: fd });
+        const data = await res.json();
+
+        document.getElementById("top").textContent = `Top pair: ${data.emp1}, ${data.emp2} | Total days: ${data.totalDays}`;
+
+        const tbl = document.getElementById("tbl");
+        tbl.style.display = "";
+
+        while (tbl.rows.length > 1) tbl.deleteRow(1);
+
+        for (const r of data.rows) {
+            const row = tbl.insertRow();
+            row.insertCell().textContent = r.emp1;
+            row.insertCell().textContent = r.emp2;
+            row.insertCell().textContent = r.projectId;
+            row.insertCell().textContent = r.daysWorked;
+        }
+    }
+</script>
+</body>
+</html>
